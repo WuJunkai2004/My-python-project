@@ -22,14 +22,24 @@ class webpage():
         self.text=text
     def tag(self,text):
         ##标签查找
-        patt=r'(?<=<%s>).+?(?=</%s>)'%(text,text)
-        data=re.findall(patt,self.text)
-        for i in xrange(len(data)):
-            data[i]=data[i].decode('utf-8')
+        patt=r'(?=<%s[\w\W]{0,}>).+?(?=</%s>)'%(text,text)
+        get =re.findall(patt,self.text)
+        data=[]
+        for i in get:
+            if(re.search(r'(?<=>).+',i)):
+                data.append(re.search(r'(?<=>).+',i).group())
         return data
     def __getattr__(self,text):
         ##快捷的标签查找
-        return self.tag(text)
+        data=self.tag(text)
+        if(len(data)==1):
+            try:
+                return eval(data[0])
+            except:
+                return data[0]
+        else:
+            return data
+        
     def read(self,*n):
         ##读取文件
         if(n):
@@ -60,10 +70,9 @@ def net(url,**kw):
     ##补充 host
     if('Host' not in headers.keys()):
         headers['Host']=host
-    ##是否存在 htmls
+    ##是否存在 htmls 和 存在 host 所对应的目录
     if(not os.path.exists('./htmls')):
         os.mkdir('htmls')
-    ##是否存在 host 所对应的目录
     if(not os.path.exists('./htmls/%s'%(named(host)))):
         os.mkdir('./htmls/%s'%named(host))
     ##和 urled 所对应的文件
@@ -99,30 +108,26 @@ def debug(text):
 
 class bilibili(object):
     def __init__(self):
+        ##初始化
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'
         }
-        self._account  = None
-        self._password = None
-    def _search(self,key,**kw):
+    def search(self,key,**kw):
         ##vartion 1.00.0
         def urls(*kw):
-            ##生成 URL 
-            kw=kw[0]
+            ##生成 URL
+            data=kw[0]
             url='https://search.bilibili.com/'
-            if('kind' in kw.keys()):
-                url+=kw['kind']
-                del kw['kind']
+            if('kind' in data.keys()):
+                url+=data['kind']
+                del data['kind']
             else:
-                url+='video'
-            data={}
-            for i in kw.keys():
-                data[i]=str(kw[i])
+                url+='all'
             url=url+'?'+urllib.urlencode(data)
             return url
         def analyse(text):
             ##解析搜索结果
-            data=re.search(r'(?<=window.__INITIAL_STATE__=).+?(?=;)',text).group().decode("utf-8")
+            data=re.search(r'(?<=window.__INITIAL_STATE__=).+?}(?=;)',text).group().decode("utf-8")
             data=re.sub('null' ,'None' ,data)
             data=re.sub('false','False',data)
             data=re.sub('true' ,'True' ,data)
@@ -142,7 +147,7 @@ class bilibili(object):
 
 def main():
     m=bilibili()
-    ml=m._search('青春猪头少年不会梦到',kind='bangumi')
+    ml=m.search('青春猪头少年不会梦到',kind='all')
 
 if(__name__=='__main__'):
     main()
