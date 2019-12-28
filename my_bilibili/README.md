@@ -12,5 +12,12 @@ import my_bilibili as my
 foo=my.bilibili()
 ```
 ### search  
-The function is running depend on [search.bilibili.com](https://search.bilibili.com). you must give a str as keywords. Others including kind , page and so on.
+The function is running depend on [search.bilibili.com](https://search.bilibili.com). you must give a str as keywords. Others including kind , page and so on.  
 This is a table for search's  values .
+ 
+ | 选项 | 类型 | 备注 | 
+ | --- | --- | --- |
+ | keyword | str | 写了也没用 | 
+ | page| int | 页数 | 
+ | order| str | 下周再整理 | 
+ | duration| int |0:全部时长;1:10分钟以下;2:10-30分钟;3:30-60分钟;4:60分钟以上 | 
