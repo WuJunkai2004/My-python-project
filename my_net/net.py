@@ -46,7 +46,7 @@ class net(object):
         self._create()
         try:
             self._load()
-        except:
+        except IOError:
             self._visit()
             self._save()
         else:
@@ -110,8 +110,12 @@ class net(object):
             os.remove('./htmls/%s/%s'%(self.path,self.file))
         else:
             raise IOError('Sorry, ./htmls/%s/%s does not exists .'%(self.path,self.file))
+    def read(self,*n):
+        ##读取数据
+        if(n):
+            return self._text[:n[0]]
+        else:
+            return self._text
     
-if(__name__=='__main__'):
-    foo=net('https://www.runoob.com/python/python-exceptions.html')
-    print(foo.title)
-    foo._clear()
+foo=net('https://www.bilibili.com/')
+print(foo.read())
