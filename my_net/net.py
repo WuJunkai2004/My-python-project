@@ -3,6 +3,8 @@
 
 from __future__ import print_function
 
+__version__='1.20.0'
+
 try:
     import urllib2
 except ImportError:
@@ -14,7 +16,6 @@ import re
 
 class net(object):
     ##网络处理
-    ##version 1.00.0
     def __init__(self,url,**kw):
         ##数据初始化
         self.url    =url
@@ -24,6 +25,7 @@ class net(object):
         self.path   =''
         self.headers={ 'User-Agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)' }
         self._text  =''
+        self._mssg  =''
         ##校准 url
         if(self.url[-1]!='/'):
             self.url+='/'
@@ -50,8 +52,19 @@ class net(object):
             self._visit()
             self._save()
         else:
-            pass
+            if(time.time()-self.time>=172800):
+                print('****over time limit****')
+                self._clear()
+                self._visit()
+                self._save()
     def __getattr__(self,text):
+        ## urllib2 的扩展与继承
+        if(text in ('time','getcode','geturl','msg')):
+            data=re.search(r'(?<=<%s>).+?(?=</%s>)'%(text,text),self._mssg).group()
+            if(text=='time'):
+                return float(data)
+            else:
+                return data
         ##快捷的标签查找
         data=self._tag(text)
         if(len(data)==1):
@@ -82,15 +95,29 @@ class net(object):
         if(not os.path.exists('./htmls/%s'%(self._named(self.host)))):
             os.mkdir('./htmls/%s'%self._named(self.host))
     def _visit(self):
+        def message(html):
+            ##生成信息
+            return '<time>%s</time><getcode>%s</getcode><geturl>%s</geturl><msg>%s</msg>'%(time.time(),html.getcode(),html.geturl(),html.msg)
         ##访问网页
         requ=urllib2.Request(self.url,self.data,self.headers)
         html=urllib2.urlopen(requ)
+        self._mssg=message(html)
         self._text=html.read()
         print('****read from url****')
     def _load(self):
+        def line(files):
+            ##读取首行
+            text=''
+            while(True):
+                w=files.read(1)
+                if(w and w!='\n'):
+                    text+=w
+                else:
+                    return text
         ##本地加载
         if(os.path.exists('./htmls/%s/%s'%(self.path,self.file))):
             docm=open('./htmls/%s/%s'%(self.path,self.file),'r')
+            self._mssg=line(docm)
             self._text=docm.read()
             docm.close()
             print('****read from file****')
@@ -100,6 +127,7 @@ class net(object):
         ##保存网页
         if(not os.path.exists('./htmls/%s/%s'%(self.path,self.file))):
             docm=open('./htmls/%s/%s'%(self.path,self.file),'w')
+            docm.write(self._mssg+'\n')
             docm.write(self._text)
             docm.close()
         else:
@@ -117,5 +145,5 @@ class net(object):
         else:
             return self._text
     
-foo=net('https://www.bilibili.com/')
-print(foo.read())
+if(__name__=='__main__'):
+    foo=net('https://www.bilibili.com/')
