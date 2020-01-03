@@ -4,7 +4,6 @@
 from __future__ import print_function
 
 import urllib
-import json
 import time
 import os
 import re
