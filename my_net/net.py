@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-__version__='1.20.0'
+__version__='1.21.0'
 
 try:
     import urllib2
@@ -57,6 +57,7 @@ class net(object):
                 self._clear()
                 self._visit()
                 self._save()
+
     def __getattr__(self,text):
         ## urllib2 的扩展与继承
         if(text in ('time','getcode','geturl','msg')):
@@ -76,24 +77,27 @@ class net(object):
             raise AttributeError('Sorry,cannot find %s'%(text))
         else:
             return data
+
     def _tag(self,text):
         ##标签查找
-        patt=r'(?=<%s[\w\W]{0,}>).+?(?=</%s>)'%(text,text)
+        patt=r'(?=<%s.+>).+?(?=</%s>)'%(text,text)
         get =re.findall(patt,self._text)
         data=[]
         for i in get:
-            if(re.search(r'(?<=>).+',i)):
-                data.append(re.search(r'(?<=>).+',i).group())
+            data.append(re.search(r'(?<=>).+',i).group())
         return data
+
     def _named(self,text):
         ##转化特殊字符
         return re.sub(r'[\W]','_',text)
+
     def _create(self):
         ##创建目录
         if(not os.path.exists('./htmls')):
             os.mkdir('htmls')
         if(not os.path.exists('./htmls/%s'%(self._named(self.host)))):
             os.mkdir('./htmls/%s'%self._named(self.host))
+
     def _visit(self):
         def message(html):
             ##生成信息
@@ -104,6 +108,7 @@ class net(object):
         self._mssg=message(html)
         self._text=html.read()
         print('****read from url****')
+
     def _load(self):
         def line(files):
             ##读取首行
@@ -123,6 +128,7 @@ class net(object):
             print('****read from file****')
         else:
             raise IOError('Sorry,cannot find ./htmls/%s/%s .'%(self.path,self.file))
+
     def _save(self):
         ##保存网页
         if(not os.path.exists('./htmls/%s/%s'%(self.path,self.file))):
@@ -132,18 +138,26 @@ class net(object):
             docm.close()
         else:
             raise IOError('Sorry, ./htmls/%s/%s already exists .'%(self.path,self.file))
+
     def _clear(self):
         ##删除网页
         if(os.path.exists('./htmls/%s/%s'%(self.path,self.file))):
             os.remove('./htmls/%s/%s'%(self.path,self.file))
         else:
             raise IOError('Sorry, ./htmls/%s/%s does not exists .'%(self.path,self.file))
+        ##清除目录
+        if(not os.listdir('./htmls/%s'%(self.path))):
+            os.rmdir('./htmls/%s'%(self.path))
+        if(not os.listdir('./htmls')):
+            os.rmdir('./htmls')
+
     def read(self,*n):
         ##读取数据
         if(n):
             return self._text[:n[0]]
         else:
             return self._text
-    
+
 if(__name__=='__main__'):
     foo=net('https://www.bilibili.com/')
+    foo._clear()
