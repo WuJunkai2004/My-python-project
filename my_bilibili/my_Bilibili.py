@@ -33,6 +33,7 @@ class bilibili(object):
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'
         }
+
     def search(self,key,**kw):
         ##vartion 1.00.0
         def urls(*kw):
@@ -59,15 +60,13 @@ class bilibili(object):
         html=urllib.unquote(net(urls(kw),headers=self.header).read()).split('\n')
         data=analyse(html[-1])
         return data
+
     def ranking(self,**kw):
         url='https://www.bilibili.com/ranking/'
         if('kind' in kw.keys()):
             url+=key['kind']
         debug(net(url,headers=self.header).read())
-
-def main():
+  
+if(__name__=='__main__'):
     m=bilibili()
     ml=m.search('青春猪头少年不会梦到',kind='all')
-
-if(__name__=='__main__'):
-    main()
