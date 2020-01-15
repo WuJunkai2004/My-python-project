@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-__version__='1.21.0'
+__version__='1.22.0'
 
 try:
     import urllib2
@@ -45,7 +45,6 @@ class net(object):
         if('Host' not in self.headers.keys()):
             self.headers['Host']=self.host
         ##处理网络数据
-        self._create()
         try:
             self._load()
         except IOError:
@@ -91,21 +90,11 @@ class net(object):
         ##转化特殊字符
         return re.sub(r'[\W]','_',text)
 
-    def _create(self):
-        ##创建目录
-        if(not os.path.exists('./htmls')):
-            os.mkdir('htmls')
-        if(not os.path.exists('./htmls/%s'%(self._named(self.host)))):
-            os.mkdir('./htmls/%s'%self._named(self.host))
-
     def _visit(self):
-        def message(html):
-            ##生成信息
-            return '<time>%s</time><getcode>%s</getcode><geturl>%s</geturl><msg>%s</msg>'%(time.time(),html.getcode(),html.geturl(),html.msg)
         ##访问网页
         requ=urllib2.Request(self.url,self.data,self.headers)
         html=urllib2.urlopen(requ)
-        self._mssg=message(html)
+        self._mssg='<time>%s</time><getcode>%s</getcode><geturl>%s</geturl><msg>%s</msg>'%(time.time(),html.getcode(),html.geturl(),html.msg)
         self._text=html.read()
         print('****read from url****')
 
@@ -130,6 +119,11 @@ class net(object):
             raise IOError('Sorry,cannot find ./htmls/%s/%s .'%(self.path,self.file))
 
     def _save(self):
+        ##创建目录
+        if(not os.path.exists('./htmls')):
+            os.mkdir('htmls')
+        if(not os.path.exists('./htmls/%s'%(self._named(self.host)))):
+            os.mkdir('./htmls/%s'%self._named(self.host))
         ##保存网页
         if(not os.path.exists('./htmls/%s/%s'%(self.path,self.file))):
             docm=open('./htmls/%s/%s'%(self.path,self.file),'w')
@@ -160,4 +154,3 @@ class net(object):
 
 if(__name__=='__main__'):
     foo=net('https://www.bilibili.com/')
-    foo._clear()
