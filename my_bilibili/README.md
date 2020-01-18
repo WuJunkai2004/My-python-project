@@ -23,16 +23,16 @@ This is a table for search's  values.
  | order| str | 下周再整理 | 
  | duration| int | `0`:`全部时长`;`1`:`10分钟以下`;`2`:`10-30分钟`;`3`:`30-60分钟`;`4`:`60分钟以上` | 
 
-#####example 1
+##### example 1
 ```
 for i in foo.search('鬼灭之刃',kind='bangumi'):
     print(i)
 ```
-#####example 2
+##### example 2
 ```
 for i in foo.search('鬼灭之刃',kind='video',page=2):
     print(i)
 ```
 
-###ranking
+### ranking
 　　building...
