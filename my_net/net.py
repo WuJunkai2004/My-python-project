@@ -21,8 +21,6 @@ import re
 class net(object):
     ##网络处理
     def __init__(self,*url,**kw):
-        if(not url):
-            return
         ##数据初始化
         self.url    =url[0]
         self.data   =None
