@@ -3,7 +3,10 @@
 
 from __future__ import print_function
 
-__version__='1.30.0'
+__author__          ='Wu junkai ( wujunkai20041123@outlook.com )'
+__version__         ='1.30.1'
+__run_enviroment__  ='Python 2.6 and above'
+__edit_enviroment__ ='Python 2.7.14 by python IDLE'
 
 try:
     import urllib2
@@ -15,12 +18,39 @@ except ImportError:
     import http.cookiejar as cookielib
 import urllib
 import time
+import sys
 import os
 import re
+
+def _setup():
+    ##安装模块
+    def path():
+        ##获取路径
+        paths=sys.path[0:]
+        return paths[map(len,paths).index(min(map(len,paths)))].replace('\\','/')+'/Lib/my_net.py'
+    def version(paths):
+        ##获取版本号
+        if(os.path.exists(paths)):
+            point=open(paths,'r')
+            doc  =point.read()
+            point.close()
+            vers =re.search(r'(?<=__version__=\').+(?=\')',doc).group()
+        else:
+            vers='0.00.0'
+        return(vers<__version__)
+    def setup(paths):
+        ##安装
+        open(paths,'w').write(open('my_net.py','r').read())
+        print('****setup successful****')
+        sys.exit()
+    if(version(path())):
+        setup(path())
 
 class net(object):
     ##网络处理
     def __init__(self,*url,**kw):
+        if(not url):
+            return
         ##数据初始化
         self.url    =url[0]
         self.data   =None
@@ -173,4 +203,3 @@ class net(object):
 
 if(__name__=='__main__'):
     foo=net('https://www.bilibili.com/')
-    print(foo.title)
