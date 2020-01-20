@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-__version__='1.22.0'
+__version__='1.23.0'
 
 try:
     import urllib2
@@ -152,5 +152,13 @@ class net(object):
         else:
             return self._text
 
+    def readlines():
+        ##读取每行
+        return self.read().split('\n')
+
+    def readline():
+        raise AttributeError('Sorry, \'readline\' has not realize .')
+
 if(__name__=='__main__'):
     foo=net('https://www.bilibili.com/')
+    print(foo.title)
