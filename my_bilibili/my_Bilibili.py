@@ -11,6 +11,7 @@ import re
 from my_net import net
 
 __author__          ='Wu Junkai(wujunkai20041123@outlook.com)'
+__version__         ='1.00.0'
 __run_environment__ ='python 2.6 and above'
 __edit_environment__='python 2.7.14 by IDLE'
 
@@ -33,7 +34,6 @@ class bilibili(object):
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'
         }
-
     def search(self,key,**kw):
         ##vartion 1.00.0
         def urls(*kw):
@@ -60,13 +60,27 @@ class bilibili(object):
         html=urllib.unquote(net(urls(kw),headers=self.header).read()).split('\n')
         data=analyse(html[-1])
         return data
+    def ranking(self,*attr):
+        def urls(kind):
+            url='https://www.bilibili.com/ranking/'
+            par={'all'     : '',
+                 'origin'  : 'origin/0/0/3',
+                 'bangumi' : 'bangumi/13/0/3',
+                 'cinema'  : 'cinema/177/0/3',
+                 'rookie'  : 'rookie/0/0/3'}
+            return url+par[kind]
+        def analyse(text):
+            data=[]
+            for i in text:
+                if(i[0]!='<'):
+                    data.append(i)
+            return data
+        kind='all'
+        if(attr):
+            kind=attr[0]
+        return analyse(net(urls(kind)).a)
 
-    def ranking(self,**kw):
-        url='https://www.bilibili.com/ranking/'
-        if('kind' in kw.keys()):
-            url+=key['kind']
-        debug(net(url,headers=self.header).read())
-  
 if(__name__=='__main__'):
     m=bilibili()
-    ml=m.search('青春猪头少年不会梦到',kind='all')
+    for i in m.ranking('bangumi'):
+        print(i)
