@@ -3,12 +3,16 @@
 
 from __future__ import print_function
 
-__version__='1.23.0'
+__version__='1.30.0'
 
 try:
     import urllib2
 except ImportError:
     import urllib.request as urllib2
+try:
+    import cookielib
+except ImportError:
+    import http.cookiejar as cookielib
 import urllib
 import time
 import os
@@ -16,14 +20,19 @@ import re
 
 class net(object):
     ##网络处理
-    def __init__(self,url,**kw):
+    def __init__(self,*url,**kw):
+        if(not url):
+            return
         ##数据初始化
-        self.url    =url
+        self.url    =url[0]
         self.data   =None
         self.file   =''
         self.host   =''
         self.path   =''
         self.headers={ 'User-Agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)' }
+        self.cookies=cookielib.CookieJar()
+        self.handle =urllib2.HTTPCookieProcessor(self.cookies)
+        self.opener =urllib2.build_opener(self.handle)
         self._text  =''
         self._mssg  =''
         ##校准 url
@@ -34,6 +43,8 @@ class net(object):
             self.headers=kw['headers']
         if('data' in kw.keys()):
             self.data=urllib.urlencode(kw['data'])
+        if('cookie' in kw.keys()):
+            self.header['Cookie']=kw['cookie']
         ##解析 url
         self.host =re.search(r'(?<=//).+?(?=/)',self.url).group()
         self.path =self._named(self.host)
@@ -83,7 +94,10 @@ class net(object):
         get =re.findall(patt,self._text)
         data=[]
         for i in get:
-            data.append(re.search(r'(?<=>).+',i).group())
+            try:
+                data.append(re.search(r'(?<=>).+',i).group())
+            except:
+                raise AttributeError('Sorry,something wrong in \' %s \''%(i))
         return data
 
     def _named(self,text):
@@ -93,7 +107,7 @@ class net(object):
     def _visit(self):
         ##访问网页
         requ=urllib2.Request(self.url,self.data,self.headers)
-        html=urllib2.urlopen(requ)
+        html=self.opener.open(requ)
         self._mssg='<time>%s</time><getcode>%s</getcode><geturl>%s</geturl><msg>%s</msg>'%(time.time(),html.getcode(),html.geturl(),html.msg)
         self._text=html.read()
         print('****read from url****')
