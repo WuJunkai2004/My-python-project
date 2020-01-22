@@ -8,25 +8,15 @@ import time
 import os
 import re
 
-from my_net import net
+try:
+    from my_net import net
+except ImportError:
+    raise ImportError('Sorry, can not find \'my_net\' .\nPlease view https://github.com/WuJunkai2004/Pyself/blob/master/my_net/my_net.py to download .')
 
 __author__          ='Wu Junkai(wujunkai20041123@outlook.com)'
-__version__         ='1.00.0'
+__version__         ='1.10.0'
 __run_environment__ ='python 2.6 and above'
 __edit_environment__='python 2.7.14 by IDLE'
-
-def tree(diction,floor):
-    for i in diction.keys():
-        if(type(diction[i])==type({})):
-            print(i+':')
-            tree(diction[i],floor+1)
-        else:
-            for _ in xrange(floor):
-                print('\t',end='')
-            print(i+':'+str(diction[i]))
-
-def debug(text):
-    open('save.log','w').write(str(text))
 
 class bilibili(object):
     def __init__(self):
@@ -35,7 +25,8 @@ class bilibili(object):
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'
         }
     def search(self,key,**kw):
-        ##vartion 1.00.0
+        ##搜索
+        ##version 1.00.0
         def urls(*kw):
             ##生成 URL
             data=kw[0]
@@ -61,15 +52,18 @@ class bilibili(object):
         data=analyse(html[-1])
         return data
     def ranking(self,*attr):
+        ##排行榜
+        ##version 1.00.0
         def urls(kind):
-            url='https://www.bilibili.com/ranking/'
+            ##生成 url
             par={'all'     : '',
                  'origin'  : 'origin/0/0/3',
                  'bangumi' : 'bangumi/13/0/3',
                  'cinema'  : 'cinema/177/0/3',
                  'rookie'  : 'rookie/0/0/3'}
-            return url+par[kind]
+            return 'https://www.bilibili.com/ranking/'+par[kind]
         def analyse(text):
+            ##解析结果
             data=[]
             for i in text:
                 if(i[0]!='<'):
@@ -80,7 +74,15 @@ class bilibili(object):
             kind=attr[0]
         return analyse(net(urls(kind)).a)
 
+
+class user(object):
+    def __init__(self):
+        self.name=''
+        self.level=''
+        self._=0
+    def _login(self,**kw):
+        print(net('https://passport.bilibili.com').title)
+
 if(__name__=='__main__'):
-    m=bilibili()
-    for i in m.ranking('bangumi'):
-        print(i)
+    m=user()
+    m._login()
