@@ -1,4 +1,4 @@
-![](https://i0.hdslb.com/bfs/archive/b712fa386d1200d9c1b4d994f8f05b697dc678bc.png)
+![](https://github.com/WuJunkai2004/Pyself/raw/master/my_image/bilibili.png)
 # A python module for bilibili.com  
 #### Edit by Wu Junkai  
 #### wujunkai20041123@outlook.com  
