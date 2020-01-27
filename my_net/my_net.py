@@ -3,11 +3,6 @@
 
 from __future__ import print_function
 
-__author__          ='Wu junkai ( wujunkai20041123@outlook.com )'
-__version__         ='1.30.1'
-__run_enviroment__  ='Python 2.6 and above'
-__edit_enviroment__ ='Python 2.7.14 by python IDLE'
-
 try:
     import urllib2
 except ImportError:
@@ -22,46 +17,113 @@ import sys
 import os
 import re
 
+if(__name__=='__main__'):
+    __file__        =os.path.basename(sys.argv[0])
+else:
+    __file__        ='%s.py'%(__name__)
+__author__          ='Wu junkai ( wujunkai20041123@outlook.com )'
+__version__         ='1.41.0'
+__run_enviroment__  ='Python 2.6 and above'
+__edit_enviroment__ ='Python 2.7.14 by python IDLE'
+
 def _setup():
     ##安装模块
     def path():
         ##获取路径
-        paths=sys.path[0:]
-        return paths[map(len,paths).index(min(map(len,paths)))].replace('\\','/')+'/Lib/my_net.py'
-    def version(paths):
+        return "%s\\Lib\\%s"%(sys.path[map(os.path.exists,map(''.join,zip(sys.path,['\\python.exe']*len(sys.path)))).index(True)],__file__)
+    def version():
         ##获取版本号
-        if(os.path.exists(paths)):
-            point=open(paths,'r')
+        if(os.path.exists(path())):
+            point=open(path(),'r')
             doc  =point.read()
             point.close()
-            vers =re.search(r'(?<=__version__=\').+(?=\')',doc).group()
+            vers =re.search(r'(?<=__version__).+',doc).group()
+            vers =re.search(r'(?<=\').+?(?=\')',vers).group()
         else:
             vers='0.00.0'
         return(vers<__version__)
-    def setup(paths):
+    def setup():
         ##安装
-        open(paths,'w').write(open('my_net.py','r').read())
+        open(path(),'w').write(open(__file__,'r').read())
         print('****setup successful****')
         sys.exit()
-    if(version(path())):
-        setup(path())
+    if(version()):
+        setup()
 
-class net(object):
+def _header():
+    ##管理 headers
+    return {
+        'Accept-Language'   : 'zh-CN,zh;q=0.9,en;q=0.8' ,
+        'User-Agent'        : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
+        }
+
+
+class web(object):
+    ##网页处理
+    def __init__(self,string):
+        ##初始化
+        self._text=string
+        self.__pos__=0
+
+    def _tag(self,text):
+        ##标签查找
+        patt=r'(?=<%s.+>).+?(?=</%s>)'%(text,text)
+        get =re.findall(patt,self._text)
+        data=[]
+        for i in get:
+            if(re.search(r'(?<=>).+',i)):
+                data.append(re.search(r'(?<=>).+',i).group())
+        return data
+
+    def read(self,*n):
+        ##读取数据
+        if(n):
+            self.__pos__+=n[0]
+            return self._text[self.__pos__-n[0]:n[0]]
+        else:
+            return self._text[self.__pos__:]
+
+    def readlines(self):
+        ##读取每行
+        return self.read().split('\n')
+
+    def readline(self):
+        ##仅读取一行
+        text=''
+        while(self.__pos__<len(self._text) and self._text[self.__pos__]!='\n'):
+            text+=self._text[self.__pos__]
+            self.__pos__+=1
+        self.__pos__+=1
+        return text
+
+    def tell(self):
+        ##返回指针位置
+        return self.__pos__
+
+    def seek(self,*n):
+        ##重置指针
+        if(n):
+            if(n[0]>=len(self._text)):
+               raise BaseException('A length error : your file is not long enough')
+            else:
+               self.__pos__=n[0]
+        else:
+               self.__pos__=0
+
+
+class net(web):
     ##网络处理
     def __init__(self,*url,**kw):
-        if(not url):
-            return
         ##数据初始化
         self.url    =url[0]
         self.data   =None
         self.file   =''
         self.host   =''
         self.path   =''
-        self.headers={ 'User-Agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)' }
+        self.headers=_header()
         self.cookies=cookielib.CookieJar()
         self.handle =urllib2.HTTPCookieProcessor(self.cookies)
         self.opener =urllib2.build_opener(self.handle)
-        self._text  =''
         self._mssg  =''
         ##校准 url
         if(self.url[-1]!='/'):
@@ -69,10 +131,12 @@ class net(object):
         ##获取传入数据
         if('headers' in kw.keys()):
             self.headers=kw['headers']
-        if('data' in kw.keys()):
+        if('data'    in kw.keys()):
             self.data=urllib.urlencode(kw['data'])
-        if('cookie' in kw.keys()):
-            self.header['Cookie']=kw['cookie']
+        if('cookie'  in kw.keys()):
+            self.headers['Cookie']=kw['cookie']
+        if('host'    in kw.keys()):
+            self.headers['Host']=kw['host']
         ##解析 url
         self.host =re.search(r'(?<=//).+?(?=/)',self.url).group()
         self.path =self._named(self.host)
@@ -90,6 +154,7 @@ class net(object):
             self._visit()
             self._save()
         else:
+            ##超时处理
             if(time.time()-self.time>=172800):
                 print('****over time limit****')
                 self._clear()
@@ -109,24 +174,12 @@ class net(object):
         if(len(data)==1):
             try:
                 return eval(data[0])
-            except:
+            except BaseException:
                 return data[0]
         elif(len(data)==0):
             raise AttributeError('Sorry,cannot find %s'%(text))
         else:
             return data
-
-    def _tag(self,text):
-        ##标签查找
-        patt=r'(?=<%s.+>).+?(?=</%s>)'%(text,text)
-        get =re.findall(patt,self._text)
-        data=[]
-        for i in get:
-            try:
-                data.append(re.search(r'(?<=>).+',i).group())
-            except:
-                raise AttributeError('Sorry,something wrong in \' %s \''%(i))
-        return data
 
     def _named(self,text):
         ##转化特殊字符
@@ -187,19 +240,5 @@ class net(object):
         if(not os.listdir('./htmls')):
             os.rmdir('./htmls')
 
-    def read(self,*n):
-        ##读取数据
-        if(n):
-            return self._text[:n[0]]
-        else:
-            return self._text
-
-    def readlines():
-        ##读取每行
-        return self.read().split('\n')
-
-    def readline():
-        raise AttributeError('Sorry, \'readline\' has not realize .')
-
 if(__name__=='__main__'):
-    foo=net('https://www.bilibili.com/')
+    _setup()
