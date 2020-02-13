@@ -60,10 +60,13 @@ def _header():
 
 class web(object):
     ##网页处理
-    def __init__(self,string):
+    def __init__(self,string=''):
         ##初始化
         self._text=string
         self.__pos__=0
+
+    def __getattr(self,attr):
+        return self._tag(attr)
 
     def _tag(self,text):
         ##标签查找
@@ -115,6 +118,7 @@ class net(web):
     ##网络处理
     def __init__(self,*url,**kw):
         ##数据初始化
+        super(net,self).__init__()
         self.url    =url[0]
         self.data   =None
         self.file   =''
