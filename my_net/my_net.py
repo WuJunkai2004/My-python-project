@@ -1,4 +1,4 @@
-# !/user/bin/python
+# !/user/bin/env python
 # coding=utf-8
 
 from __future__ import print_function
@@ -65,8 +65,8 @@ class web(object):
         self._text=string
         self.__pos__=0
 
-    def __getattr(self,attr):
-        return self._tag(attr)
+    def __getattr(self,text):
+        return self._tag(text)
 
     def _tag(self,text):
         ##标签查找
@@ -116,10 +116,10 @@ class web(object):
 
 class net(web):
     ##网络处理
-    def __init__(self,*url,**kw):
+    def __init__(self,url='',**kw):
         ##数据初始化
         super(net,self).__init__()
-        self.url    =url[0]
+        self.url    =url
         self.data   =None
         self.file   =''
         self.host   =''
@@ -129,9 +129,6 @@ class net(web):
         self.handle =urllib2.HTTPCookieProcessor(self.cookies)
         self.opener =urllib2.build_opener(self.handle)
         self._mssg  =''
-        ##校准 url
-        if(self.url[-1]!='/'):
-            self.url+='/'
         ##获取传入数据
         if('headers' in kw.keys()):
             self.headers=kw['headers']
@@ -141,29 +138,20 @@ class net(web):
             self.headers['Cookie']=kw['cookie']
         if('host'    in kw.keys()):
             self.headers['Host']=kw['host']
-        ##解析 url
-        self.host =re.search(r'(?<=//).+?(?=/)',self.url).group()
-        self.path =self._named(self.host)
-        try:
-            self.file =self._named(re.search(r'(?<=%s/).+(?=/)'%(self.host),self.url).group())+'.html'
-        except AttributeError:
-            self.file ='home.html'
-        ##补充 host
-        if('Host' not in self.headers.keys()):
-            self.headers['Host']=self.host
-        ##处理网络数据
-        try:
-            self._load()
-        except IOError:
-            self._visit()
-            self._save()
-        else:
-            ##超时处理
-            if(time.time()-self.time>=172800):
-                print('****over time limit****')
-                self._clear()
+        if(self._analyze()):
+            ##处理网络数据
+            try:
+                self._load()
+            except IOError:
                 self._visit()
                 self._save()
+            else:
+                ##超时处理
+                if(time.time()-self.time>=172800):
+                    print('****over time limit****')
+                    self._clear()
+                    self._visit()
+                    self._save()
 
     def __getattr__(self,text):
         ## urllib2 的扩展与继承
@@ -184,6 +172,23 @@ class net(web):
             raise AttributeError('Sorry,cannot find %s'%(text))
         else:
             return data
+
+    def _analyze(self):
+        if(not self.url):
+            return False
+        ##校准并解析 url
+        if(self.url[-1]!='/'):
+            self.url+='/'
+        self.host =re.search(r'(?<=//).+?(?=/)',self.url).group()
+        self.path =self._named(self.host)
+        try:
+            self.file =self._named(re.search(r'(?<=%s/).+(?=/)'%(self.host),self.url).group())+'.html'
+        except AttributeError:
+            self.file ='home.html'
+        ##补充 host
+        if('Host' not in self.headers.keys()):
+            self.headers['Host']=self.host
+        return True
 
     def _named(self,text):
         ##转化特殊字符
@@ -243,6 +248,3 @@ class net(web):
             os.rmdir('./htmls/%s'%(self.path))
         if(not os.listdir('./htmls')):
             os.rmdir('./htmls')
-
-if(__name__=='__main__'):
-    _setup()
