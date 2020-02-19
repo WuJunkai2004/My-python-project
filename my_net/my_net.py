@@ -22,7 +22,7 @@ if(__name__=='__main__'):
 else:
     __file__        ='%s.py'%(__name__)
 __author__          ='Wu junkai ( wujunkai20041123@outlook.com )'
-__version__         ='1.41.0'
+__version__         ='1.42.0'
 __run_enviroment__  ='Python 2.6 and above'
 __edit_enviroment__ ='Python 2.7.14 by python IDLE'
 
@@ -182,7 +182,11 @@ class net(web):
         self.host =re.search(r'(?<=//).+?(?=/)',self.url).group()
         self.path =self._named(self.host)
         try:
-            self.file =self._named(re.search(r'(?<=%s/).+(?=/)'%(self.host),self.url).group())+'.html'
+            if(self.url.split('.')[-1] not in ('html/','htm/')):
+                self.file =self._named(re.search(r'(?<=%s/).+(?=/)'%(self.host),self.url).group())+'.html'
+            else:
+                self.file =self._named(re.search(r'(?<=%s/).+(?=/)'%(self.host),self.url).group())
+                self.file =re.sub(r'_htm',r'.htm',self.file)
         except AttributeError:
             self.file ='home.html'
         ##补充 host
@@ -203,19 +207,10 @@ class net(web):
         print('****read from url****')
 
     def _load(self):
-        def line(files):
-            ##读取首行
-            text=''
-            while(True):
-                w=files.read(1)
-                if(w and w!='\n'):
-                    text+=w
-                else:
-                    return text
         ##本地加载
         if(os.path.exists('./htmls/%s/%s'%(self.path,self.file))):
             docm=open('./htmls/%s/%s'%(self.path,self.file),'r')
-            self._mssg=line(docm)
+            self._mssg=docm.readline()[:-1]
             self._text=docm.read()
             docm.close()
             print('****read from file****')
