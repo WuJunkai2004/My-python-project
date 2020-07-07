@@ -1,7 +1,7 @@
 #coding=utf-8
 
-# * SDK of music.ghpym.com 
-# * Wu Junkai wrote by python 2.7.17
+# * a SDK of music.ghpym.com ( no copyright )
+# * Wu Junkai wrote by python 2.7.17 and run with requests
 # * version = 0.80.0
 
 import requests
