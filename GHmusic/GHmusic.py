@@ -2,7 +2,7 @@
 
 # * a SDK of music.ghpym.com ( no copyright )
 # * Wu Junkai wrote by python 2.7.17 and run with requests
-# * version = 0.80.0
+# * version = 0.80.5
 
 import requests
 
